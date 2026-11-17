@@ -1,0 +1,144 @@
+openapi: 3.0.3
+info:
+  title: UMKM REST API
+  version: 1.0.0
+  description: CRUD API UMKM dengan respons JSON yang konsisten.
+servers:
+  - url: http://127.0.0.1:8080/api
+paths:
+  /umkm:
+    get:
+      summary: Ambil semua data UMKM
+      responses:
+        '200':
+          description: Daftar UMKM
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+    post:
+      summary: Tambah data UMKM
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UmkmInput'
+      responses:
+        '201':
+          description: UMKM berhasil dibuat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /umkm/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Ambil detail UMKM
+      responses:
+        '200':
+          description: Detail UMKM
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      summary: Ganti seluruh field data UMKM
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UmkmInput'
+      responses:
+        '200':
+          description: UMKM berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Hapus data UMKM
+      responses:
+        '200':
+          description: UMKM berhasil dihapus
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  schemas:
+    UmkmInput:
+      type: object
+      required: [nama_umkm, kategori]
+      properties:
+        nama_umkm: { type: string }
+        pemilik: { type: string }
+        alamat: { type: string }
+        kategori: { type: string }
+        kontak: { type: string }
+        deskripsi: { type: string }
+    Umkm:
+      allOf:
+        - $ref: '#/components/schemas/UmkmInput'
+        - type: object
+          required: [id]
+          properties:
+            id: { type: integer }
+    ItemResponse:
+      type: object
+      required: [success, message, data]
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        data: { $ref: '#/components/schemas/Umkm' }
+    ListResponse:
+      type: object
+      required: [success, message, data]
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Umkm' }
+    ErrorResponse:
+      type: object
+      required: [success, message, errors]
+      properties:
+        success: { type: boolean, example: false }
+        message: { type: string }
+        errors:
+          type: object
+          additionalProperties: { type: string }
+  responses:
+    ValidationError:
+      description: Input tidak valid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Data tidak ditemukan
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [success, message]
+            properties:
+              success: { type: boolean, example: false }
+              message: { type: string }
